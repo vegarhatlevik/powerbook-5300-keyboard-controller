@@ -4,11 +4,14 @@
 // actual Leonrdo board, and I have the same problem. So, I will leave this define
 // here until I understand what is going wrong. With the define, it works fine.
 #define USBCON
-// Even if US layout is the default, you get a compiler warning if you don't define it.
+// Select which layout we're implementing
 #define HID_CUSTOM_LAYOUT
-#define LAYOUT_UNITED_KINGDOM
+//#define LAYOUT_UNITED_KINGDOM
 //#define LAYOUT_US_ENGLISH
+#define LAYOUT_GERMAN
+// #define LAYOUT_GERMAN_MAC
 #include <HID-Project.h>
+//#include <HID-Project/SingleReport/BootKeyboard.h>
 
 #include "PowerBook5300Keyboard.h"
 #include "InputOutputTools.h"
@@ -25,18 +28,7 @@ static void debugPrint(String s, uint8_t row, uint8_t column, uint8_t keyCode) {
 #endif
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Key definitions
 
-static const uint8_t KEY_PWR = 0xFF; // This should be handled specially, but not yet sure how.
-static const uint8_t KEY_NONE = 0; // Not really needed because it will never be detected.
-
-static const uint8_t RIGHT_SHIFT = 0xe2;
-
-static const uint8_t MINUS = 0x2d;
-//static const uint8_t KEY_TAB = 0x09;
-//static const uint8_t KEY_BACKSPACE = 0x08;
-//static const uint8_t KEY_SPACE = 0x20;
 
 /*
 
@@ -79,80 +71,88 @@ static const uint8_t ROW_4 = 6;
 static const uint8_t ROW_5 = 7;
 static const uint8_t ROW_6 = 8;
 static const uint8_t ROW_7 = 9;
-/*
-static const uint8_t _SRCLR = 21;
-static const uint8_t _OE = 20;
-static const uint8_t RCLK = 19;
+
+// static const uint8_t COL_A = 10;
+// static const uint8_t COL_B = 16;
+// static const uint8_t COL_C = 14;
+// static const uint8_t COL_D = 18;
+// static const uint8_t COL_E = 19;
+// static const uint8_t COL_F = 20;
+// static const uint8_t COL_OE = 21;
+
+// Output pins 14, 16, 18 and 19 for serial to parallel converter for columns
+
+static const uint8_t SRCLR = 21;
+static const uint8_t OE = 20;
 static const uint8_t SER = 18;
-static const uint8_t _DETECT = 14;
 static const uint8_t SRCLK = 16;
-*/
 
-static const uint8_t _COL_0 = 10;
-static const uint8_t _COL_1 = 16;
-static const uint8_t _COL_2 = 14;
-static const uint8_t _COL_3 = 18;
-static const uint8_t _COL_4 = 19;
-static const uint8_t _COL_5 = 20;
-static const uint8_t _COL_6 = 21;
+static const uint8_t CLED = 15; // active low
 
-static const uint8_t _CLED = 15; // active low
-
-static const uint8_t outputPins[] = {_CLED};
+//static const uint8_t outputPins[] = {CLED, COL_A, COL_B, COL_C, COL_D, COL_E, COL_F, COL_OE};
+static const uint8_t outputPins[] = {CLED, SRCLR, OE, SER, SRCLK};
 static const uint8_t inputPullupPins[] = {};
 
 /////////////////////////////////////////////////////////////////////////////
 // Layout
 
-static const uint8_t columns[]={_COL_0, _COL_1, _COL_2, _COL_3, _COL_4, _COL_5, _COL_6};
+//static const uint8_t columns[]={COL_A, COL_B, COL_C, COL_D, COL_E, COL_F};
+//static const uint8_t columns[]={_COL_0, _COL_1, _COL_2, _COL_3, _COL_4, _COL_5, _COL_6, _COL_7, _COL_8, _COL_9, _COL_10};
 // static const uint8_t columns[]={_COL_0, _COL_1, _COL_2, _COL_3, _COL_4};
 static const uint8_t rows[]={ROW_0, ROW_1, ROW_2, ROW_3, ROW_4, ROW_5, ROW_6, ROW_7};
 
-static const uint8_t MAX_COLS = sizeof(columns);
+//static const uint8_t MAX_COLS = sizeof(columns);
+static const uint8_t MAX_COLS = 11;
 static const uint8_t MAX_ROWS = sizeof(rows);
 
+/////////////////////////////////////////////////////////////////////////////
+// Key definitions
+
+static const uint8_t KEY_PWR = 0xFF; // This should be handled specially, but not yet sure how.
+static const uint8_t KEY_NONE = 0; // Not really needed because it will never be detected.
+
+static const uint8_t RIGHT_SHIFT = 0xe2;
+static const uint8_t LEFT_SHIFT = 0xe1;
+
+static const uint8_t TAB = 0x09;
+static const uint8_t BACKSPACE = 0x08;
+static const uint8_t SPACE = 0x20;
+
+static const uint8_t  LEFT_ALT = 0xe9;
+#define COMMA KEY_NONE
+#define PERIOD KEY_NONE
+#define MINUS KEY_NONE
+#define PLUS KEY_NONE
+#define GRAVE KEY_NONE
+
+#ifdef LAYOUT_GERMAN
 static uint8_t keyMatrix[MAX_ROWS][MAX_COLS] = {
-    {KEY_RIGHT_SHIFT, KEY_ESC, KEY_NONE, KEY_F11, KEY_NONE, MINUS, KEY_NONE},
+    {RIGHT_SHIFT, KEY_ESC, KEY_NONE, KEY_F11, KEY_NONE, KEY_DE_SZ, KEY_NONE, KEY_NONE, KEY_RETURN, KEYPAD_ENTER, KEY_DE_HASHTAG2},
+    {HID_KEYBOARD_POWER, KEY_F2, KEY_F3, KEY_F1, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F10, KEY_F8, KEY_F9},
+    {KEY_LEFT_CTRL, 'x', 'c', 'z', 'v', 'b', 'n', 'm', MINUS, COMMA, PERIOD},
+    {KEY_LEFT_GUI, 's', 'd', 'a', 'f', 'g', 'h', 'j', KEY_DE_OE, 'k', 'l'},
+    {LEFT_ALT, 'w', 'e', 'q', 'r', 't', 'y', 'u', 'p', 'i', 'o'},
+    {KEY_CAPS_LOCK, '2', '3', '1', '4', '5', '6', '7', '8', '9'},
+    {LEFT_SHIFT, TAB, KEY_NONE, BACKSPACE, KEY_NONE, KEY_DE_AE, SPACE, KEY_NONE, PLUS, KEY_LEFT, KEY_DOWN},
+    {KEY_NONE, KEY_DE_SMALLER, KEY_DE_DACH, KEY_F12, KEY_NONE, KEY_DE_UE, KEY_NONE, KEY_NONE, GRAVE, KEY_RIGHT, KEY_UP}
+  };
+#else
+static uint8_t keyMatrix[MAX_ROWS][MAX_COLS] = {
+    {RIGHT_SHIFT, KEY_ESC, KEY_NONE, KEY_F11, KEY_NONE, KEY_DE_SZ, KEY_NONE},
     {KEY_PWR, KEY_F2, KEY_F3, 0xbe, KEY_F4, KEY_F5, KEY_F6},
     {KEY_LEFT_CTRL, 'x', 'c', 'z', 'v', 'b', 'n'},
     {KEY_LEFT_GUI, 's', 'd', 'a', 'f', 'g', 'h'},
-    {KEY_LEFT_ALT, 'w', 'e', 'q', 'r', 't', 'y'},
+    {LEFT_ALT, 'w', 'e', 'q', 'r', 't', 'y'},
     {KEY_CAPS_LOCK, '2', '3', '1', '4', '5', '6'},
-    {KEY_LEFT_SHIFT, KEY_TAB, KEY_NONE, KEY_BACKSPACE, KEY_NONE, 0x27, KEY_SPACE},
-    {KEY_NONE, 0x60, 0xa7, KEY_F12, KEY_NONE, 0x5b, KEY_NONE}
+    {LEFT_SHIFT, TAB, KEY_NONE, BACKSPACE, KEY_NONE, 0x27, SPACE},
+    {KEY_NONE, 0x3c, 0x60, KEY_F12, KEY_NONE, 0x5b, KEY_NONE}
   };
-
-// static const uint8_t keyMatrix[MAX_ROWS][MAX_COLS] = {
-//     {KEY_RIGHT_SHIFT, KEY_ESC, KEY_NONE, KEY_F11, KEY_NONE},
-//     {KEY_PWR, KEY_F2, KEY_F3, KEY_F1, KEY_F4},
-//     {KEY_LEFT_CTRL, 'x', 'c', 'z', 'v'},
-//     {KEY_LEFT_GUI, 's', 'd', 'a', 'f'}
-//   };
+#endif
 
 static uint8_t previousMatrix[MAX_ROWS][MAX_COLS] = {{1}};
 static uint8_t readMatrix[MAX_ROWS][MAX_COLS] = {{1}};
 
 /////////////////////////////////////////////////////////////////////////////
-
-PowerBook5300Keyboard::PowerBook5300Keyboard()
-  {}
-
-void PowerBook5300Keyboard::init() {
-  ;
-  for (uint8_t i=0; i<sizeof(columns); i++) {
-    InputOutputTools::initOutput(columns[i]);
-  }
-  for (uint8_t i=0; i<sizeof(outputPins); i++) {
-    InputOutputTools::initOutput(outputPins[i]);
-  }
-  for (uint8_t i=0; i<sizeof(rows); i++) {
-    InputOutputTools::initInputPullup(rows[i]);
-  }
-  for (uint8_t i=0; i<sizeof(inputPullupPins); i++) {
-    InputOutputTools::initInputPullup(inputPullupPins[i]);
-  }
-  BootKeyboard.begin();
-}
 
 void debugPrintMatrix(uint8_t matrix[MAX_ROWS][MAX_COLS]) {
   for (uint8_t row=0; row<MAX_ROWS; row++) {
@@ -171,67 +171,106 @@ void debugPrintMatrices(uint8_t readMatrix[MAX_ROWS][MAX_COLS], uint8_t previous
   debugPrintMatrix(readMatrix);
 }
 
-void PowerBook5300Keyboard::scanMatrix() {
-  // Scan one column at a time by setting it's control line low
-  // and reading the input pin for each row
-  bool debugLog = false;
-  for (uint8_t column=0; column<MAX_COLS; column++) {
-    InputOutputTools::setLow(columns[column]);
-    delayMicroseconds(15);
-    for (uint8_t row=0; row<MAX_ROWS; row++) {
-      previousMatrix[row][column] = readMatrix[row][column];
-      readMatrix[row][column] = InputOutputTools::read(rows[row]);
-      if (readMatrix[row][column] != previousMatrix[row][column]) {
-        //debugLog=true;
-        uint8_t keyCode = keyMatrix[row][column];
-        if (readMatrix[row][column] == 1) {
-          BootKeyboard.release(keyCode);
-          debugPrint("Key released: ", row, column, keyCode);
+/////////////////////////////////////////////////////////////////////////////
 
-        } else {
-          BootKeyboard.press(keyCode);
-          debugPrint("Key pressed: ", row, column, keyCode);
-        }
-      }
-      if (debugLog) {
-        String str = String("Row scan complete: "+String(row)+"\n");
-        Serial.write(str.c_str());
-      }
-    }
-    if (debugLog) {
-      String str = String("Column scan complete: "+String(column)+"\n");
-      Serial.write(str.c_str());
-    }
-    InputOutputTools::setHigh(columns[column]);
+PowerBook5300Keyboard::PowerBook5300Keyboard()
+  {}
+
+void PowerBook5300Keyboard::init() {
+  ;
+  // for (uint8_t i=0; i<sizeof(columns); i++) {
+  //   InputOutputTools::initOutput(columns[i]);
+  // }
+  for (uint8_t i=0; i<sizeof(outputPins); i++) {
+    InputOutputTools::initOutput(outputPins[i]);
   }
-  if (debugLog) {
-    // debugPrintMatrix(readMatrix);
-    // debugPrintMatrix(previousMatrix);
-    String str = String("Matrix scan complete.\n");
-    Serial.write(str.c_str());
+  for (uint8_t i=0; i<sizeof(rows); i++) {
+    InputOutputTools::initInputPullup(rows[i]);
   }
-  debugLog=false;
+  for (uint8_t i=0; i<sizeof(inputPullupPins); i++) {
+    InputOutputTools::initInputPullup(inputPullupPins[i]);
+  }
+  InputOutputTools::setHigh(OE);
+  BootKeyboard.begin();
 }
 
-void PowerBook5300Keyboard::interpretMatrix() {
-  // Compare the read matrix to the previous matrix to determine what has changed.
-  // If something has changed, send the corresponding key action and remember the
-  // new value for the next scan.
-  for (uint8_t column=0; column<MAX_COLS; column++) {
-    for (uint8_t row=0; row<MAX_ROWS; row++) {
+bool PowerBook5300Keyboard::detectKey(uint8_t row, uint8_t column) {
+  bool rval = false;
+  previousMatrix[row][column] = readMatrix[row][column];
+  readMatrix[row][column] = InputOutputTools::read(rows[row]);
+  if (readMatrix[row][column] != previousMatrix[row][column]) {
+    rval = true;
+    uint8_t keyCode = keyMatrix[row][column];
+    if (readMatrix[row][column] == 1) {
+      BootKeyboard.release(keyCode);
+      debugPrint("Key released: ", row, column, keyCode);
+    } else {
+      BootKeyboard.press(keyCode);
+      debugPrint("Key pressed: ", row, column, keyCode);
     }
+  }
+  return rval;
+}
+
+void PowerBook5300Keyboard::writeColumnBit(uint8_t bit) {
+  InputOutputTools::setHigh(OE);
+  InputOutputTools::setOutputPin(SER, bit);
+  InputOutputTools::setLow(SRCLK);
+  delayMicroseconds(5);
+  InputOutputTools::setHigh(SRCLK);
+  delayMicroseconds(5);
+}
+
+void PowerBook5300Keyboard::dectivateAllColumns() {
+  InputOutputTools::setHigh(OE);
+  delayMicroseconds(1);
+  for (int i=0; i<8; i++) {
+    writeColumnBit(HIGH);
+    delayMicroseconds(1);
+  }
+  // Load a 0 into first position of shift register.
+  // This is needed because othe utput register is one clock cycle
+  // behind the shift register
+  writeColumnBit(LOW);
+  delayMicroseconds(1);
+}
+
+void PowerBook5300Keyboard::activateNextColumn() {
+  writeColumnBit(HIGH);
+  InputOutputTools::setLow(OE);
+  delayMicroseconds(1);
+}
+
+void PowerBook5300Keyboard::scanMatrix() {
+  bool debugLog = false;
+  // First clear shift register
+  dectivateAllColumns();
+  // Scan one column at a time by setting its control line low
+  // and reading the input pin for each row
+  for (uint8_t column=0; column<MAX_COLS; column++) {
+    activateNextColumn();
+    for (uint8_t row=0; row<MAX_ROWS; row++) {
+      debugLog = detectKey(row, column);
+    }
+  }
+  dectivateAllColumns();
+  if (debugLog) {
+    debugPrintMatrix(readMatrix);
+     // debugPrintMatrix(previousMatrix);
+    String str = String("Matrix scan complete.\n");
+    Serial.write(str.c_str());
+    debugLog = false;
   }
 }
 
 void PowerBook5300Keyboard::scan() {
   scanMatrix();
-  interpretMatrix();
   // Check the status of the CapsLock LED
   if (BootKeyboard.getLeds() & LED_CAPS_LOCK) {
     // LED should be on
-    InputOutputTools::setLow(_CLED);
+    InputOutputTools::setLow(CLED);
   } else {
     // LED should be off
-    InputOutputTools::setHigh(_CLED);
+    InputOutputTools::setHigh(CLED);
   }
 }

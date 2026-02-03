@@ -22,6 +22,14 @@ public:
     digitalWrite(pin, HIGH);
   }
 
+  static void setOutputPin(uint8_t pin, uint8_t value) {
+    if (0 == value) {
+      InputOutputTools::setLow(pin);
+    } else {
+      InputOutputTools::setHigh(pin);
+    }
+  }
+
   static uint8_t read(uint8_t pin) {
     pinMode(pin, INPUT_PULLUP);
     return digitalRead(pin); 
