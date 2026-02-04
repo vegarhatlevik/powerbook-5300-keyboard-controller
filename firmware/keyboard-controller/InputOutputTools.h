@@ -34,4 +34,12 @@ public:
     pinMode(pin, INPUT_PULLUP);
     return digitalRead(pin); 
   }
+
+  static void debugPrint(String s, uint8_t row, uint8_t column, uint8_t keyCode) {
+#ifdef DEBUG
+  char c = keyCode;
+  String str = s + "row=" + row + ", column=" + column + ", 0x" + String(keyCode, HEX) + ", " + String(c) + "\n";
+  Serial.print(str.c_str());
+#endif
+  }
 };
